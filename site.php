@@ -1,7 +1,16 @@
 <?php
 
+function debug($str){
+	
+	echo "DEBUG: " . $str;
+	
+}
+
 $submitted = isset($_POST["submit"]);
 $display = false;
+$subtotalError = false;
+$tipError = false;
+$splitError = false;
 
 if($submitted){
 	
@@ -21,24 +30,43 @@ if($submitted){
 	}
 	
 	// Checks for the correct conditions - displays nothing otherwise
+	$subtotalError = !(is_numeric($subtotal) && $subtotal > 0);
+	$tipError = !(is_numeric($tipPercent) && $tipPercent > 0);
+	$splitError = !($numSplit > 0);
+	
 	$display = is_numeric($subtotal) && $subtotal > 0 && is_numeric($tipPercent) && $tipPercent > 0 && $numSplit > 0;
-	$displaySplit = $numSplit > 1;
 	
 }
 
 echo "<html>";
-echo "<head></head>";
+echo "<head><link rel=\"stylesheet\" href=\"./style.css\"></head>";
 echo "<body>";
 
+	echo "<div id=\"main\">";
+
 	echo "<h3>Tip Calculator</h3>";
+	echo "<hr>";
 	
 	echo "<form method=\"post\" action=\"./site.php\">";
 	
 		//Don't reset the default value, if already submitted
 	
+		// Open subtotal div
+		echo "<div";
+		echo $subtotalError?" class=\"error\" ":"";
+		echo ">";
+	
 		echo "Bill Subtotal: $<input type=\"text\" name=\"subtotal\" value=\"";
 		echo $submitted?$subtotal:0;
 		echo "\">";
+	
+		echo "</div>";
+		//Close subtotal div
+	
+		// Open tip div
+		echo "<div";
+		echo $tipError?" class=\"error\" ":"";
+		echo ">";
 	
 		echo "<br>";
 		echo "Tip percentage:";
@@ -71,14 +99,29 @@ echo "<body>";
 		echo $submitted?$customPercent:0;
 		echo "\">%";
 		
-		echo "<br><br>";
+		echo "</div>";	
+		// Close tip div
+		
+		echo "<br>";
+		
+		//Open split div
+		echo "<div";
+		echo $splitError?" class=\"error\" ":"";
+		echo ">";
 		
 		echo "Split: <input type =\"text\" name=\"num_split\" value=\"";
 		echo $submitted?$numSplit:0;
 		echo "\"> person(s)";
 		
-		echo "<br><br>";
+		echo "</div>";
+		
+		echo "<br>";
+		
+		//Open submit div
+		echo "<div id=\"submit\">";
 		echo "<input type=\"submit\" name=\"submit\" value=\"Submit\">";
+		echo "</div>";
+		echo "<hr>";
 	
 	echo "</form>";
 	
@@ -87,19 +130,25 @@ echo "<body>";
 		$finalTip = round($subtotal * ($tipPercent/100.0),2);
 		$finalTotal = round($finalTip + $subtotal,2);
 	
+		//Start div for output
+		echo "<div id=\"output\">";
+	
 		echo "Tip: $" . $finalTip;
 		echo "<br>";
 		echo "Total: $" . $finalTotal;
 	
+		$displaySplit = $numSplit > 1;
 		if($displaySplit)
 		{
 			
-			echo "<br>";
+			echo "<hr>";
 			echo "Tip each: $" . round($finalTip/$numSplit,2);
 			echo "<br>";
 			echo "Total each: $" . round($finalTotal/$numSplit,2);
 			
 		}
+	
+		echo "</div>";
 	
 	}
 	
