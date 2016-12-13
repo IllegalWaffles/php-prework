@@ -1,6 +1,21 @@
+/* Author: Kuba Gasiorowski */
+/* Date of last edit: 12/12/2016 */
+
 input[type="text"] {
 	
 	width:35px;
+	
+}
+
+input[type="number"] {
+	
+	width:43px;
+	
+}
+
+input[type="range"] {
+	
+	width:43px;
 	
 }
 

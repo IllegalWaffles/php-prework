@@ -1,5 +1,8 @@
 <?php
 
+// Author: Kuba Gasiorowski
+// Date of last edit: 12/12/2016
+
 function debug($str){
 	
 	echo "DEBUG: " . $str;
@@ -109,8 +112,8 @@ echo "<body>";
 		echo $splitError?" class=\"error\" ":"";
 		echo ">";
 		
-		echo "Split: <input type =\"text\" name=\"num_split\" value=\"";
-		echo $submitted?$numSplit:0;
+		echo "Split: <input type =\"number\" name=\"num_split\" value=\"";
+		echo $submitted?$numSplit:1;
 		echo "\"> person(s)";
 		
 		echo "</div>";
