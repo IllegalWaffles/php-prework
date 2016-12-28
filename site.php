@@ -3,78 +3,83 @@
 // Author: Kuba Gasiorowski
 // Date of last edit: 12/12/2016
 
-function debug($str){
+	// Functions
+	function debug($str){
 	
-	echo "DEBUG: " . $str;
+		echo "DEBUG: " . $str;
 	
-}
-
-$submitted = isset($_POST["submit"]);
-$display = false;
-$subtotalError = false;
-$tipError = false;
-$splitError = false;
-
-if($submitted){
-	
-	$display = 			true; // Initially, set display to true
-	$displaySplit = 	false;
-	$subtotal = 		$_POST["subtotal"];	// Get subtotal
-	$tipPercent = 		$_POST["percentage"]; // Get tip percent
-	$customPercent =	$_POST["custom_percent"];
-	$numSplit = 		$_POST["num_split"];
-	$customTipFlag = 	false;	// Initially, set custom tip to false
-	
-	if($tipPercent == "none"){
-			
-			$tipPercent = 		$customPercent;
-			$customTipFlag = 	true;
-			
 	}
-	
-	// Checks for the correct conditions - displays nothing otherwise
-	$subtotalError = !(is_numeric($subtotal) && $subtotal > 0);
-	$tipError = !(is_numeric($tipPercent) && $tipPercent > 0);
-	$splitError = !($numSplit > 0);
-	
-	$display = is_numeric($subtotal) && $subtotal > 0 && is_numeric($tipPercent) && $tipPercent > 0 && $numSplit > 0;
-	
-}
 
-echo "<html>";
-echo "<head><link rel=\"stylesheet\" href=\"./style.css\"></head>";
-echo "<body>";
-
-	echo "<div id=\"main\">";
-
-	echo "<h3>Tip Calculator</h3>";
-	echo "<hr>";
+	//Global vars we need
+	$submitted = 		isset($_POST["submit"]);
+	$display = 			false;
+	$subtotalError = 	false;
+	$tipError = 		false;
+	$splitError = 		false;
+	$customTipFlag = 	false;
 	
-	echo "<form method=\"post\" action=\"./site.php\">";
+	// Do some logic, if the form has already been submitted once
+	if($submitted){
 	
-		//Don't reset the default value, if already submitted
-	
-		// Open subtotal div
-		echo "<div";
-		echo $subtotalError?" class=\"error\" ":"";
-		echo ">";
-	
-		echo "Bill Subtotal: $<input type=\"text\" name=\"subtotal\" value=\"";
-		echo $submitted?$subtotal:0;
-		echo "\">";
-	
-		echo "</div>";
-		//Close subtotal div
-	
-		// Open tip div
-		echo "<div";
-		echo $tipError?" class=\"error\" ":"";
-		echo ">";
-	
-		echo "<br>";
-		echo "Tip percentage:";
-		echo "<br>";
+		$display = 			true; // Initially, set display to true
+		$customTipFlag = 	false;	// Initially, set custom tip to false
+		$subtotal = 		$_POST["subtotal"];	// Get subtotal
+		$tipPercent = 		$_POST["percentage"]; // Get tip percent
+		$customPercent =	$_POST["custom_percent"]; // Get curstom percent value (may not be needed)
+		$numSplit = 		$_POST["num_split"]; // Get number to split for
 		
+	
+		// If user chose custom tip
+		if($tipPercent == "none"){
+			
+			$tipPercent = 		$customPercent; // Save custom percent
+			$customTipFlag = 	true; // Remember that custom tip was chosen
+			
+		}
+	
+		// Checks for the correct conditions - displays nothing otherwise
+		$subtotalError = !is_numeric($subtotal) || $subtotal <= 0;
+		$tipError = !is_numeric($tipPercent) || $tipPercent <= 0;
+		$splitError = ($numSplit <= 0);
+	
+		// If there was any error, do not display
+		$display = !($subtotalError || $tipError || $splitError);
+	
+	}
+
+?>
+
+<html>
+<head><link rel="stylesheet" href="./style.css"></head>
+<body>
+
+	<div id="main">
+
+	<h3>Tip Calculator</h3>
+	<hr>
+	
+	<form method="post" action="./site.php">
+	
+		<!-- Don't reset the default value, if already submitted -->
+	
+		<!-- Open subtotal div -->
+		<div <?php echo $subtotalError?" class=\"error\"" : "";?>>
+
+		Bill Subtotal: $<input type="text" name="subtotal" value="<?php echo $submitted?$subtotal:0; ?>">
+	
+		<!-- Close subtotal div -->
+		</div>
+		
+		<!-- Open tip div -->
+		<div <?php echo $tipError?"class=\"error\"" : ""; ?>>
+		
+		<br>
+		Tip percentage:
+		<br>
+
+		<?php	
+
+		// Display radio input buttons
 		for($i=10; $i < 25; $i=$i+5){
 			
 			echo "<input type=\"radio\""; 
@@ -83,50 +88,44 @@ echo "<body>";
 			if(!$submitted && $i == 10)
 				echo " checked ";
 			
-			if($submitted)
-				echo $tipPercent==$i?" checked ":"";
+			else if($submitted && $tipPercent==$i)
+				echo " checked ";
+			
+			else 
+				echo " ";
 			
 			echo "name=\"percentage\" value=\"" . $i . "\">" . $i . "%";
 		
 		}
-	 
-		echo "<br>";
+
+		?>
+
+		<br>
 		
-		echo "<input type=\"radio\"";
-		if($submitted)
-			echo $customTipFlag?" checked ":"";
-		echo "name=\"percentage\" value=\"none\">";
+		<input type="radio"<?php echo ($customTipFlag && $submitted)?" checked " : " "; ?>name="percentage" value="none">
+		<input type="text" name="custom_percent" value="<?php echo $submitted?$customPercent:0;?>">%
+		<!-- Close tip div -->
+		</div>	
 		
+		<br>
 		
-		echo "<input type=\"text\" name=\"custom_percent\" value=\"";
-		echo $submitted?$customPercent:0;
-		echo "\">%";
+		<!-- Open split div -->
+		<div <?php echo $splitError?"class=\"error\"" : ""; ?>>
+		Split: <input type ="number" name="num_split" value="<?php echo $submitted?$numSplit:1; ?>"> person(s)
 		
-		echo "</div>";	
-		// Close tip div
-		
-		echo "<br>";
-		
-		//Open split div
-		echo "<div";
-		echo $splitError?" class=\"error\" ":"";
-		echo ">";
-		
-		echo "Split: <input type =\"number\" name=\"num_split\" value=\"";
-		echo $submitted?$numSplit:1;
-		echo "\"> person(s)";
-		
-		echo "</div>";
-		
-		echo "<br>";
-		
-		//Open submit div
-		echo "<div id=\"submit\">";
-		echo "<input type=\"submit\" name=\"submit\" value=\"Submit\">";
-		echo "</div>";
-		echo "<hr>";
+		<!-- Close split div -->
+		</div>
+
+		<br>
+		<!-- Open submit div -->
+		<div id="submit">
+		<input type="submit" name="submit" value="Submit">
+		</div>
+		<hr>
 	
-	echo "</form>";
+	</form>
+	
+<?php
 	
 	if($display){
 	
@@ -134,7 +133,7 @@ echo "<body>";
 		$finalTotal = round($finalTip + $subtotal,2);
 	
 		//Start div for output
-		echo "<div id=\"output\">";
+		?><div id="output"><?php
 	
 		echo "Tip: $" . $finalTip;
 		echo "<br>";
@@ -154,7 +153,8 @@ echo "<body>";
 		echo "</div>";
 	
 	}
-	
-echo "</body>";
-echo "</html>";
+
 ?>
+	
+</body>
+</html>
